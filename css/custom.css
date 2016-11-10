@@ -1,0 +1,68 @@
+@font-face {
+    font-family: gotham-L;
+    src: url(Gotham/Gotham-Light.otf);
+}
+
+h1 {
+	font-family: 'Lora', serif;
+	font-weight: 700;
+	font-size: 36px;
+	line-height: 48px;
+}
+
+h4 {
+	font-family: 'Lora', serif;
+	font-weight: 700;
+	font-size: 24px;
+	line-height: 36px;
+}
+
+p {
+	font-family: 'gotham-L', sans-serif;
+	font-weight: 700;
+	font-size: 16px;
+	line-height: 24px;
+}
+
+.inline-text {
+	display: inline-block;
+}
+
+.margin-top-sm {
+	margin-top: 24px;
+}
+
+.margin-top-md {
+	margin-top: 48px;
+}
+
+.axis-label {
+	color: #333;
+	font-family: 'gotham-L', sans-serif;
+	font-size: 14px;
+}
+
+.axis path,
+.axis line{
+    fill: none;
+    stroke: #aaa;
+    stroke-width: 1px;
+    shape-rendering: crispEdges;
+}
+
+text {
+	font-family: 'gotham-L', sans-serif;
+	font-size: 14px;
+}
+
+.payoffLine {
+	fill: none;
+	stroke: #bbb;
+	stroke-width: 1.5px;
+}
+
+.utilityLine {
+	fill: none;
+	stroke: #bbb;
+	stroke-width: 1.5px;
+}
