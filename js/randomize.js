@@ -4,7 +4,7 @@ xMargin = 60,
 yMargin = 60,
 xLabelX = 360,
 xLabelY = height,
-yLabelX = xMargin + 20,
+yLabelX = xMargin - 35,
 yLabelY = yMargin + 40;
 
 var xScale, yScale;
@@ -74,14 +74,22 @@ function drawPayoff(data){
 					.append('g')
 					.attr('class', 'payoffGroup');
 
-	/*var line = d3.svg.line()
+	var mean = calcMean(data);
+
+	var line = d3.svg.line()
 					.x(function(d, i){ return xScale(i+1); })
-					.y(function(d){ return yScale(d); })
+					.y(function(d, i){ return yScale(mean)});
 
 	var payoffLine = payoffGroup.append('path')
 					.datum(data)
 					.attr('class', 'payoffLine')
-					.attr('d', line);*/
+					.attr('d', line)
+					.on("mouseover", function(d, i){
+						meanPopup(mean, i);
+					})
+					.on("mouseout", function(d){
+						payoffGroup.selectAll(".data-label").remove();
+					});
 
 	var payoffCircle = payoffGroup.selectAll('circle')
 						.data(data)
@@ -94,12 +102,45 @@ function drawPayoff(data){
 								return 0;
 							}
 							else {
-								return 5;
+								return 2;
 							}
 						})
-						.attr('fill', '#666');
-}
+						.attr('fill', '#666')
+						.on("mouseover", function(d, i){
+							payoffPopup(d, i);
+						})
+						.on("mouseout", function(d){
+							payoffGroup.selectAll(".data-label").remove();
+						});
 
+	function payoffPopup(d, i){
+		payoffGroup.append('rect')
+			.attr("class", "data-label label-container")
+			.attr("transform", "translate("+ (xScale(i)) +","+ (yScale(d)-42) +")")
+			.attr("opacity", 0.8);
+
+		payoffGroup.append("text")
+			.attr("class", "data-label")
+			.attr("id", "data-amt-in")
+			.attr("dy", "-21")
+			.attr("transform", "translate("+ (xScale(i)+8) +","+ yScale(d) +")")
+			.text("Payoff: "+ d);
+	}
+
+	function meanPopup(mean, i){
+		payoffGroup.append('rect')
+			.attr("class", "data-label label-container")
+			.attr("transform", "translate("+ (width-2*xMargin-8) +","+ (yScale(mean)-42) +")")
+			.attr("opacity", 0.8);
+
+		payoffGroup.append("text")
+			.attr("class", "data-label")
+			.attr("id", "data-amt-in")
+			.attr("dy", "-21")
+			.attr("transform", "translate("+ (width-2*xMargin) +","+ yScale(mean) +")")
+			.text("Mean: "+ mean.toFixed(2));
+	}
+}
 /*
 ========== draw axis for Histogram ==========
 */
@@ -175,7 +216,27 @@ function drawHist(payoff){
 	    .attr("x", 1)
 	    .attr("width", (xScaleHist(data[0].dx)/2))
 	    .attr("height", function(d) { return height - yMargin - yScaleHist(d.y); })
-	    .attr("fill", "#4580b0");
+	    .attr("fill", "#4580b0")
+	    .on("mouseover", function(d, i){
+	    	histPopup(d, i)
+	    })
+	    .on("mouseout", function(d, i){
+	    	histGroup.selectAll(".data-label").remove();
+	    });
+
+	function histPopup(d, i){
+		histGroup.append('rect')
+			.attr("class", "data-label label-container")
+			.attr("transform", "translate("+ (xScaleHist(d.x)) +","+ (yScaleHist(d.y)-42) +")")
+			.attr("opacity", 0.8);
+
+		histGroup.append("text")
+			.attr("class", "data-label")
+			.attr("id", "data-amt-in")
+			.attr("dy", "-21")
+			.attr("transform", "translate("+ (xScaleHist(d.x)+8) +","+ yScaleHist(d.y) +")")
+			.text("Count: "+ d.y);
+	}
 }
 
 function quicksort(data, low, high){
@@ -229,16 +290,29 @@ var histogram = d3.select('div.payoffHist')
 var utility = d3.select('div.utilityPlot')
 				.append('svg')
 				.attr('class', 'utilityFn')
-				.attr('width', 900)
-				.attr('height', 540);
+				.attr('width', width)
+				.attr('height', height);
+
+function calcMean(array){
+	var sum = 0
+	for (i=0; i<array.length; i++){
+		sum += array[i];
+	}
+	return sum/array.length;
+}
 
 function calcUtility(max, wealth, cost){
-	utilData = [];
+	utilData = [], minIdx = 0;
 	for (k=0; k<max; k++){
 		chance = Math.pow(2, k/2);
-		var deltaE = (Math.log(wealth + chance - cost) - Math.log(wealth));
-		utilData.push(deltaE/chance);
+		var deltaE = (Math.log(wealth + chance - cost) - Math.log(wealth))/chance;
+		if (deltaE < 0){
+			minIdx += 1;
+		}
+		utilData.push(deltaE);
 	}
+	maxOfArray = d3.max(utilData);
+	indexOfMax = utilData.indexOf(maxOfArray);
 }
 
 function calcMaxSpend(wealth){
@@ -257,57 +331,86 @@ function calcMaxSpend(wealth){
 
 function plotUtility(max, wealth, cost){
 	var xScaleUtil = d3.scale.linear()
-				.domain([0, k])
-				.range([xMargin, width - xMargin]);
+				.domain([0, k/2])
+				.range([xMargin+20, width-xMargin]);
 
-		yScaleUtil = d3.scale.linear()
-						.domain([d3.min(utilData), d3.max(utilData)+0.02])
-						.range([height - yMargin, yMargin]);
+	yScaleUtil = d3.scale.linear()
+					.domain([d3.min(utilData), d3.max(utilData)+0.02])
+					.range([height - yMargin, yMargin]);
 
-		// Define x and y Axis
-		var xAxisUtil = d3.svg.axis()
-							.scale(xScaleUtil)
-							.orient("bottom")
-							.tickFormat(d3.format("d"));
+	// Define x and y Axis
+	var xAxisUtil = d3.svg.axis()
+						.scale(xScaleUtil)
+						.orient("bottom")
+						.tickFormat(d3.format("d"));
 
-		var yAxisUtil = d3.svg.axis()
-							.scale(yScaleUtil)
-							.orient("left")
-							.ticks("7");
+	var yAxisUtil = d3.svg.axis()
+						.scale(yScaleUtil)
+						.orient("left")
+						.ticks("7");
 
-		utility.append("g")
-			.attr("class", "axis")
-			.attr("id", "xAxis")
-			.attr("transform", "translate(0," + (height - yMargin) + ")")
-			.call(xAxisUtil);
+	utility.append("g")
+		.attr("class", "axis")
+		.attr("id", "xAxis")
+		.attr("transform", "translate(0," + (height - yMargin) + ")")
+		.call(xAxisUtil);
 
-		utility.append("g")
-			.attr("class", "axis")
-			.attr("id", "yAxis")
-			.attr("transform", "translate("+ xMargin + ","+ 0 +")")
-			.call(yAxisUtil);
+	utility.append("g")
+		.attr("class", "axis")
+		.attr("id", "yAxis")
+		.attr("transform", "translate("+ (xMargin+20) + ","+ 0 +")")
+		.call(yAxisUtil);
 
-		utility.append("text")
-		    .attr("class", "axis-label")
-		    .attr("transform", "translate("+ yLabelX +","+ yLabelY +") rotate(-90)")
-		    .text("Utility");
+	utility.append("text")
+	    .attr("class", "axis-label")
+	    .attr("transform", "translate("+ yLabelX +","+ yLabelY +") rotate(-90)")
+	    .text("Utility");
 
-		utility.append("text")
-		    .attr("class", "axis-label")
-		    .attr("transform", "translate("+ xLabelX +","+ xLabelY +")")
-		    .attr("dy", "-20")
-		    .text("Number of Games");
+	utility.append("text")
+	    .attr("class", "axis-label")
+	    .attr("transform", "translate("+ xLabelX +","+ xLabelY +")")
+	    .attr("dy", "-20")
+	    .text("Number of Heads (k)");
 
-		var utilGroup = d3.select('svg.utilityFn')
-						.append('g')
-						.attr('class', 'utilGroup');
+	var utilGroup = d3.select('svg.utilityFn')
+					.append('g')
+					.attr('class', 'utilGroup');
 
-		var line = d3.svg.line()
-						.x(function(d, i){ return xScaleUtil(i+1); })
-						.y(function(d){ return yScaleUtil(d); })
+	var line = d3.svg.line()
+					.x(function(d, i){ return xScaleUtil(i/2+1); })
+					.y(function(d){ return yScaleUtil(d); })
 
-		var utilLine = utilGroup.append('path')
-						.datum(utilData)
-						.attr('class', 'utilityLine')
-						.attr('d', line);
+	var utilLine = utilGroup.append('path')
+					.datum(utilData)
+					.attr('class', 'utilityLine')
+					.attr('d', line);
+
+	var maxUtil = d3.svg.line()
+					.x(xScaleUtil(indexOfMax/2))
+					.y(function(d){ return yScaleUtil(d); })
+
+	var maxLine = utilGroup.append('path')
+					.datum(utilData)
+					.attr('class', 'maxUtility')
+					.attr('d', maxUtil)
+					.on("mouseover", function(d, i){
+						maxUtilPopup(indexOfMax);
+					})
+					.on("mouseout", function(d){
+						utilGroup.selectAll(".data-label").remove();
+					});
+
+	function maxUtilPopup(max){
+		utilGroup.append('rect')
+			.attr("class", "data-label label-container")
+			.attr("transform", "translate("+ (xScaleUtil(minIdx/2)+8) +","+ ((height-yMargin)-42) +")")
+			.attr("opacity", 0.8);
+
+		utilGroup.append("text")
+			.attr("class", "data-label")
+			.attr("id", "data-amt-in")
+			.attr("dy", "-21")
+			.attr("transform", "translate("+ (xScaleUtil(minIdx/2)+16) +","+ (height-yMargin) +")")
+			.text("Payoff: $"+ minIdx/2);
+	}
 }
