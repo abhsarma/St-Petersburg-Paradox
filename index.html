@@ -24,7 +24,20 @@
 
     <!-- Custom CSS -->
     <link href="css/custom.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Lora:400,700" rel="stylesheet">
+    <link href="css/portfolio.css" rel="stylesheet">
+    <style>
+        div.cover-image{
+            margin-top: 72px;
+            height: 320px;
+            width: 100%;
+            background: url(images/cover.jpg) no-repeat center center fixed; 
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+            background-position: 0px 80px;
+        }
+    </style>
 
     <script type="text/javascript">
         var payoff = [], //uninitialized list to store cointoss payoffs
@@ -90,13 +103,48 @@
 <body id="page-top" onload="setUpTangle();">
     <div class="container">
         <div class="row">
-            <div class="col-lg-8">
-                <h1>Explorable Explanations</h1>
+            <div class="col-md-12 col-xs-12 text-center">
+                <div class="navbar nav-fix-top">
+                    <a class="page-header" id="title-header" href="../index.html">
+                        <h1 class="uppercase text-shrink">Abhraneel Sarma</h1>
+                    </a>
+                    <div class="hr">
+                        <div class="row">
+                            <div class="col-sm-2 col-sm-offset-3 col-xs-4">
+                                <div class="nav-page-tabs">
+                                    <div class="current-page">
+                                        <a class="quick-links-current" href="../index.html">Work</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-2 col-xs-4">
+                                <div class="nav-page-tabs">
+                                    <a class="quick-links" href="https://drive.google.com/file/d/0B7ZA2gHdFDLhdS1PcTJvRTFCVG8/view?usp=sharing" target="_blank">Resume</a>
+                                </div>
+                            </div>
+                            <div class="col-sm-2 col-xs-4">
+                                <div class="nav-page-tabs">
+                                    <a class="quick-links" href="../about/index.html">About</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="cover-image"></div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 col-lg-offset-2">
+                <h2>Explorable Explanations</h2>
                 <h4 class="margin-top-md">The St. Petersburg Paradox</h4>
                 <p>This paradox describes a theoretical lottery game which results in a random variable with infinite expected value but nevertheless would be of only small value to participants.</p>
                 <p class="margin-top-sm"><i>"A casino offers a game of chance for a single player in which a fair coin is tossed at each stage. The initial stake starts at 2 dollars and is doubled every time heads appears. The first time tails appears, the game ends and the player wins whatever is in the pot. Thus the player wins 2 dollars if tails appears on the first toss, 4 dollars if heads appears on the first toss and tails on the second, 8 dollars if heads appears on the first two tosses and tails on the third, and so on. What would be a fair price to pay the casino for entering the game?"</i></p><p style="text-align: right">- Wikipedia</p>
                 <p class="margin-top-sm">Ideally, the price to enter the game should be determined by the average payout of the game. The expected value is:</p>
-                <img class="img-responsive" src="images/expectation.jpg">
+                <img class="img-responsive margin-top-sm" src="images/expectation.jpg">
                 <p class="margin-top-sm">Assuming the game can continue as long as the coin toss results in heads and in particular that the casino has unlimited resources, this sum is unbound and so the expected win for repeated play is an infinite amount of money. Considering nothing but the expected value of the net change in one's monetary wealth, one should therefore play the game at any price if offered the opportunity. However, most people would not be willing to pay more than a very small amount of money.</p>
                 <p id="setGames">Below, we are simulating <span data-var="games" class="TKAdjustableNumber" data-min="20" data-max="100"> games</span>, to show you the fractional probability of getting a high payoff. Here the maximum payoff is $<span data-var="payoff"></span> while the mean payoff is $<span data-var="avgPayoff"></span>.</p>
             </div>
@@ -111,10 +159,10 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-lg-8">
+            <div class="col-lg-6 col-lg-offset-2">
                 <p class="margin-top-md">The classical resolution of this paradox involved the explicit introduction of the uility function (where, utility is the satisfaction or benefit derived by consuming a product) which presumes the law of diminishing marginal utility of money. According to this, the first unit of gain in money yields more uility than the second and subsequent units.</p>
                 <p class="margin-top-sm">For this game, the utility model uses the logarithmic function, which is known as the log utility. In this function, the gambler's wealth is represented as <i>w</i> and the cost to enter the game is <i>c</i>. The utility function calculates the change in utility as <i>ln</i>(wealth after the game) - <i>ln</i>(wealth before the game), which is weighted by the probability of that event occuring.</p>
-                <img class="img-responsive" src="images/utility.jpg">
+                <img class="img-responsive margin-top-sm" src="images/utility.jpg">
                 <p class="margin-top-sm" id="setUtility">Utility is often used to show how a person should behave in such a situation. If you have a total of $<span data-var="wealth" class="TKAdjustableNumber" data-min="1" data-max="100000"></span>, and the game charges you $<span data-var="cost" class="TKAdjustableNumber" data-min="1" data-max="100000"></span> to enter, this is what your utility would look like. In this case, one would need to win at least <span data-var="minPositive"></span> to have a positive utility.</p>
                 <div class="utilityPlot"></div>
                 <p class="margin-top-sm margin-btm-md" id="getSpend">Ideally, you would look to maximize your utility. Hence, in any game where your payoff is less than zero you incur a negative utility. Under the current constraints, you should be willing to pay a maximum of <span id="spend" data-var="spend">$</span> to enter the game, as the equation above indicates, the summation from 0 to infinity yields a positive value if the cost is atmost $8.

@@ -3,25 +3,11 @@
     src: url(Gotham/Gotham-Light.otf);
 }
 
-h1 {
-	font-family: 'Lora', serif;
-	font-weight: 700;
-	font-size: 36px;
-	line-height: 48px;
-}
-
-h4 {
-	font-family: 'Lora', serif;
-	font-weight: 700;
-	font-size: 24px;
-	line-height: 36px;
-}
-
 p {
 	font-family: 'gotham-L', sans-serif;
 	font-weight: 700;
-	font-size: 16px;
-	line-height: 24px;
+	font-size: 14px;
+	line-height: 21px;
 }
 
 .inline-text {
