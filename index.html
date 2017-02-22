@@ -20,22 +20,18 @@
 
     <!-- Bootstrap Core CSS  -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap.css">
 
     <!-- Custom CSS -->
     <link href="css/custom.css" rel="stylesheet">
     <link href="css/portfolio.css" rel="stylesheet">
     <style>
         div.cover-image{
-            margin-top: 72px;
-            height: 320px;
-            width: 100%;
-            background: url(images/cover.jpg) no-repeat center center fixed; 
-            -webkit-background-size: cover;
-            -moz-background-size: cover;
-            -o-background-size: cover;
+            margin-top: 90px;
+            height: 420px;
+            background: url(images/cover.jpg) no-repeat center center fixed;
             background-size: cover;
-            background-position: 0px 80px;
+            background-position: 0px 48px;
         }
     </style>
 
@@ -100,14 +96,16 @@
     </script>
 </head>
 
-<body id="page-top" onload="setUpTangle();">
-    <div class="container">
+<body id="page-top" class="index" onload="setUpTangle();">
+    <!-- Navigation Bar -->
+    <div class="navbar nav-fix-top">
         <div class="row">
-            <div class="col-md-12 col-xs-12 text-center">
-                <div class="navbar nav-fix-top">
+            <div class="col-md-10 col-md-offset-1 col-xs-12 text-center">
+                <div class="container">
                     <a class="page-header" id="title-header" href="../index.html">
-                        <h1 class="uppercase text-shrink">Abhraneel Sarma</h1>
+                        <h1 class="text-shrink">Abhraneel Sarma</h1>
                     </a>
+                    
                     <div class="hr">
                         <div class="row">
                             <div class="col-sm-2 col-sm-offset-3 col-xs-4">
@@ -134,11 +132,13 @@
         </div>
     </div>
 
-    <div class="cover-image"></div>
+    <div class="container-fluid">
+        <div class="cover-image"></div>
+    </div>
 
     <div class="container">
         <div class="row">
-            <div class="col-lg-6 col-lg-offset-2">
+            <div class="col-md-8 col-md-offset-1">
                 <h2>Explorable Explanations</h2>
                 <h4 class="margin-top-md">The St. Petersburg Paradox</h4>
                 <p>This paradox describes a theoretical lottery game which results in a random variable with infinite expected value but nevertheless would be of only small value to participants.</p>
@@ -151,15 +151,15 @@
         </div>
 
         <div class="row">
-            <div class="col-lg-6">
+            <div class="col-md-6">
                 <div class="payoffGame"></div>
             </div>
-            <div class="col-lg-6">
+            <div class="col-md-6">
                 <div class="payoffHist"></div>
             </div>
         </div>
         <div class="row">
-            <div class="col-lg-6 col-lg-offset-2">
+            <div class="col-md-8 col-md-offset-1">
                 <p class="margin-top-md">The classical resolution of this paradox involved the explicit introduction of the uility function (where, utility is the satisfaction or benefit derived by consuming a product) which presumes the law of diminishing marginal utility of money. According to this, the first unit of gain in money yields more uility than the second and subsequent units.</p>
                 <p class="margin-top-sm">For this game, the utility model uses the logarithmic function, which is known as the log utility. In this function, the gambler's wealth is represented as <i>w</i> and the cost to enter the game is <i>c</i>. The utility function calculates the change in utility as <i>ln</i>(wealth after the game) - <i>ln</i>(wealth before the game), which is weighted by the probability of that event occuring.</p>
                 <img class="img-responsive margin-top-sm" src="images/utility.jpg">
@@ -169,37 +169,8 @@
             </div>
         </div>
     </div>
-    <div class="container">
-        <div class="col-md-10 col-md-offset-1 col-xs-12">
-            <div class="sr margin-top-lg"></div>
-            <ul class="list-inline list-unstyled text-center">
-                <div class="project-list">
-                    <a class="footer-list" href="../chi17/index.html">Elevate</a>
-                </div>
-                <div class="project-list">
-                    <a class="footer-list" href="../algo/index.html">AlgoPlay</a>
-                </div>
-                <div class="project-list">
-                    <a class="footer-list" href="../segregate/index.html">Segregate</a>
-                </div>
-                <div class="project-list">
-                    <a class="footer-list" href="../kaahor-xorai/index.html">Kaahor Xorai</a>
-                </div>
-                <div class="project-list">
-                    <a class="footer-list" href="../Football-Transfers-Vis/index.html">PL Transfers</a>
-                </div>
-                <div class="project-list">
-                    <a class="footer-list" href="../project-bee/index.html">Project Bee</a>
-                </div>
-                <div class="project-list">
-                    <a class="footer-list" href="../engage/index.html">Engage</a>
-                </div>
-            </ul>
-            <div class="sr"></div>
-            <div class="page-footer">
-                <p class="footer-text text-center">Abhraneel Sarma © 2017</p>
-            </div>
-        </div>
+    <div class="page-footer margin-top-xl">
+        <p class="footer-text text-center">Abhraneel Sarma © 2017</p>
     </div>
 </body>
 

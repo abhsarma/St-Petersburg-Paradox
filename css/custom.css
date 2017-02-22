@@ -4,32 +4,32 @@
 }
 
 p {
-	font-family: 'gotham-L', sans-serif;
-	font-weight: 700;
-	font-size: 14px;
-	line-height: 21px;
+  font-family: 'gotham-L', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 21px;
 }
 
 .inline-text {
-	display: inline-block;
+  display: inline-block;
 }
 
 .margin-top-sm {
-	margin-top: 24px;
+  margin-top: 24px;
 }
 
 .margin-top-md {
-	margin-top: 48px;
+  margin-top: 48px;
 }
 
 .margin-btm-md {
-	margin-bottom: 48px;
+  margin-bottom: 48px;
 }
 
 .axis-label {
-	color: #333;
-	font-family: 'gotham-L', sans-serif;
-	font-size: 14px;
+  color: #333;
+  font-family: 'gotham-L', sans-serif;
+  font-size: 14px;
 }
 
 .axis path,
@@ -41,41 +41,41 @@ p {
 }
 
 text {
-	font-family: 'gotham-L', sans-serif;
-	font-size: 14px;
+  font-family: 'gotham-L', sans-serif;
+  font-size: 14px;
 }
 
 .payoffLine {
-	fill: none;
-	stroke: #f2893b;
-	stroke-width: 1.5px;
+  fill: none;
+  stroke: #f2893b;
+  stroke-width: 1.5px;
 }
 
 .utilityLine {
-	fill: none;
-	stroke: #bbb;
-	stroke-width: 1.5px;
+  fill: none;
+  stroke: #bbb;
+  stroke-width: 1.5px;
 }
 
 #spend {
-	color: #f2893b;
+  color: #f2893b;
 }
 
 .label-container{
-	height: 32px;
-	width: 80px;
-	background-color: '#333';
+  height: 32px;
+  width: 80px;
+  background-color: '#333';
 }
 
 text.data-label {
-	fill: white;
-	font-family: 'gotham-L', sans-serif;
-	font-weight: 300;
-	font-size: 12px;
+  fill: white;
+  font-family: 'gotham-L', sans-serif;
+  font-weight: 300;
+  font-size: 12px;
 }
 
 .maxUtility {
-	fill: none;
-	stroke: #f2893b;
-	stroke-width: 1.5px;
+  fill: none;
+  stroke: #f2893b;
+  stroke-width: 1.5px;
 }
