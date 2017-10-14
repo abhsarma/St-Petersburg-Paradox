@@ -1,13 +1,8 @@
-@font-face {
-    font-family: gotham-L;
-    src: url(Gotham/Gotham-Light.otf);
-}
-
 p {
-  font-family: 'gotham-L', sans-serif;
-  font-weight: 700;
-  font-size: 14px;
-  line-height: 21px;
+  font-family: 'Avenir Next', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
 }
 
 .inline-text {
