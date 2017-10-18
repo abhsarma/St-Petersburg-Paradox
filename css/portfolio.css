@@ -84,7 +84,7 @@ h4.short-caption {
 /* Project Page details sub-headers*/
 .project-details{
 	text-transform: uppercase;
-	color: #2f9ba0 !important;
+	color: #f2893b !important;
 }
 
 p.project-detail-subheaders{
@@ -132,6 +132,10 @@ p.tooltiptext{
 	font: 12px/21px 'Avenir Next';
 	padding: 5px 5px;
 	margin: 0px;
+}
+
+b {
+	font-weight: 600;
 }
 
 /*

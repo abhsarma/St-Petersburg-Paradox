@@ -43,9 +43,16 @@
 }
 
 .TKAdjustableNumberHelp {
+	display: none !important;
 	position: absolute;
-	margin-top: 10px;
+	margin-top: 18px;
 	color: #666;
-	font: 9px "Helvetica-Neue", "Arial", sans-serif;
+	font: 12px "Helvetica-Neue", "Arial", sans-serif;
+}
+
+.AdjustHelp {
+	display: inline;
+	color: #666;
+	font: 12px "Avenir Next", sans-serif;
 }
 

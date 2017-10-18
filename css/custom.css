@@ -22,9 +22,17 @@ p {
 }
 
 .axis-label {
-  color: #333;
-  font-family: 'gotham-L', sans-serif;
-  font-size: 14px;
+  fill: #4a4a4a !important;
+  font-family: 'Avenir Next', sans-serif;
+  font-weight: 500;
+  font-size: 24px;
+}
+
+.tickFormat {
+  fill: #4a4a4a !important;
+  font-family: 'Avenir Next', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
 }
 
 .axis path,
@@ -36,7 +44,7 @@ p {
 }
 
 text {
-  font-family: 'gotham-L', sans-serif;
+  font-family: 'Avenir Next', sans-serif;
   font-size: 14px;
 }
 
@@ -58,19 +66,39 @@ text {
 
 .label-container{
   height: 32px;
-  width: 80px;
+  width: 100px;
   background-color: '#333';
 }
 
 text.data-label {
   fill: white;
-  font-family: 'gotham-L', sans-serif;
+  font-family: 'Avenir Next', sans-serif;
   font-weight: 300;
-  font-size: 12px;
+  font-size: 14px;
+  line-height: 32px;
 }
 
 .maxUtility {
   fill: none;
   stroke: #f2893b;
   stroke-width: 1.5px;
+}
+
+.val-adjust{
+  font-size: 24px;
+  font-weight: 600;
+  font-family: 'Avenir Next', 'Helvetica Neue', sans-serif;
+  line-height: 48px;
+}
+
+.val-output{
+  font-weight: 700;
+  text-transform: underline;
+}
+
+.sim-output{
+  font-size: 18px;
+  font-weight: 500;
+  font-family: 'Avenir Next', 'Helvetica Neue', sans-serif;
+  line-height: 30px;
 }

@@ -16,7 +16,7 @@
 
     <!-- D3 and JQuery Javascript -->
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
-    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
 
     <!-- Bootstrap Core CSS  -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
@@ -37,7 +37,6 @@
 
     <script type="text/javascript">
         var payoff = [], //uninitialized list to store cointoss payoffs
-        count = {}, //empty objects to store count of the different payoffs yielded
         numGames = 20, //number of simulations
         wealth = 0;
 
@@ -46,8 +45,7 @@
         }
 
         function randomGenerator(n){
-            payoff = [];
-            count = {};
+            payoff = []; // empty the array
             for (i=0; i<n; i++){
                 var random, wins = 0, earn = 0;
                 do {
@@ -56,23 +54,24 @@
                 }
                 while (random)
                 earn = Math.pow(2, wins);
-                payoff.push(earn);
+                payoff.push(+earn);
             }
+            payoff.sort(function(a, b){return a-b});
         }
 
         function setUpTangle () {
             var element = document.getElementById("setGames");
             var tangle = new Tangle(element, {
                 initialize: function () {
-                    this.games = 20;
+                    this.games = numGames;
                 },
                 update: function () {
                     emptyCanvas();
                     randomGenerator(this.games);
+                    updateCanvas(payoff);
                     drawAxis(this.games, payoff);
                     drawPayoff(payoff);
-                    drawHist(payoff);
-                    this.payoff = d3.max(payoff);
+                    this.payoff = d3.sum(payoff);
                     this.avgPayoff = calcMean(payoff).toFixed(2);
                 }
             });
@@ -80,16 +79,21 @@
             var utilElem = document.getElementById("setUtility");
             var utilTangle = new Tangle(utilElem, {
                 initialize: function () {
-                    this.wealth = 20;
+                    this.wealth = 1000;
                     this.cost = 10;
                 },
                 update: function () {
                     emptyUtility();
-                    calcUtility(40, this.wealth, this.cost);
-                    plotUtility(40, this.wealth, this.cost);
-                    var maxSpend = calcMaxSpend(this.wealth);
-                    this.minPositive = "$"+Math.floor(Math.pow(2, (minIdx/2)));
-                    $('span#spend').text('$'+maxSpend);
+                    utilityVal = calcUtility(20, this.wealth, this.cost);
+                    plotUtility(20, utilityVal, this.wealth, this.cost);
+                    //var maxSpend = calcMaxSpend(this.wealth);
+                    if (util >= 0){
+                        this.minPositive = "";
+                    } else {
+                        this.minPositive = "not";
+                    }
+                    
+                    //$('span#spend').text('$'+maxSpend);
                 }
             });
         }
@@ -143,35 +147,62 @@
     </div>
 
     <div class="container">
-        <div class="row">
-            <div class="col-md-8 col-md-offset-1">
+            <div class="col-md-8">
                 <h2 class="margin-top-lg">Explorable Explanations:<br>The St. Petersburg Paradox</h2>
                 <p class="margin-top-md">This paradox describes a theoretical lottery game which results in a random variable with infinite expected value but nevertheless would be of only small value to participants.</p>
                 <p class="margin-top-sm"><i>"A casino offers a game of chance for a single player in which a fair coin is tossed at each stage. The initial stake starts at 2 dollars and is doubled every time heads appears. The first time tails appears, the game ends and the player wins whatever is in the pot. Thus the player wins 2 dollars if tails appears on the first toss, 4 dollars if heads appears on the first toss and tails on the second, 8 dollars if heads appears on the first two tosses and tails on the third, and so on. What would be a fair price to pay the casino for entering the game?"</i></p><p style="text-align: right">- Wikipedia, <a target="_blank" href="https://en.wikipedia.org/wiki/St._Petersburg_paradox">The St. Petersburg Paradox</a></p>
                 <p class="margin-top-sm">Ideally, the price to enter the game should be determined by the average payout of the game. The expected value is:</p>
                 <img class="img-responsive margin-top-sm" src="images/expectation.jpg">
-                <p class="margin-top-sm">Assuming the game can continue as long as the coin toss results in heads and in particular that the casino has unlimited resources, this sum is unbound and so the expected win for repeated play is an infinite amount of money. Considering nothing but the expected value of the net change in one's monetary wealth, one should therefore play the game at any price if offered the opportunity. However, most people would not be willing to pay more than a very small amount of money.</p>
-                <p id="setGames">Below, we are simulating <span data-var="games" class="TKAdjustableNumber" data-min="20" data-max="100"> games</span>, to show you the fractional probability of getting a high payoff. Here the maximum payoff is $<span data-var="payoff"></span> while the mean payoff is $<span data-var="avgPayoff"></span>.</p>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6">
-                <div class="payoffGame"></div>
-            </div>
-            <div class="col-md-6">
-                <div class="payoffHist"></div>
-            </div>
+                <p class="margin-top-sm">Assuming the game can continue as long as the coin toss results in heads and in particular that the casino has unlimited resources, this sum is unbound and so the expected win for repeated play is an infinite amount of money. Considering nothing but the expected value of the net change in one's monetary wealth, one should therefore play the game at any price if offered the opportunity. However, people should not be willing to pay more than a very small amount of money.</p>
+                <h4 class="margin-top-sm margin-btm-sm">Why?</h4>
+                <p>To figure that out, let's simulate some games to see what the likely outcomes really are.</p>
         </div>
         <div class="row">
-            <div class="col-md-8 col-md-offset-1">
-                <p class="margin-top-md">The classical resolution of this paradox involved the explicit introduction of the uility function (where, utility is the satisfaction or benefit derived by consuming a product) which presumes the law of diminishing marginal utility of money. According to this, the first unit of gain in money yields more uility than the second and subsequent units.</p>
-                <p class="margin-top-sm">For this game, the utility model uses the logarithmic function, which is known as the log utility. In this function, the gambler's wealth is represented as <i>w</i> and the cost to enter the game is <i>c</i>. The utility function calculates the change in utility as <i>ln</i>(wealth after the game) - <i>ln</i>(wealth before the game), which is weighted by the probability of that event occuring.</p>
-                <img class="img-responsive margin-top-sm" src="images/utility.jpg">
-                <p class="margin-top-sm" id="setUtility">Utility is often used to show how a person should behave in such a situation. If you have a total of $<span data-var="wealth" class="TKAdjustableNumber" data-min="1" data-max="100000"></span>, and the game charges you $<span data-var="cost" class="TKAdjustableNumber" data-min="1" data-max="100000"></span> to enter, this is what your utility would look like. In this case, one would need to win at least <span data-var="minPositive"></span> to have a positive utility.</p>
+            <div class="col-md-8">
+                <div class="payoffGame margin-top-sm"></div>
+            </div>
+            <div class="col-md-4">
+                <h6 class="project-details margin-top-md">Simulate games</h6>
+                <div id="setGames">
+                    <span>
+                        <p class="val-adjust" style="display: inline;"><span data-var="games" class="TKAdjustableNumber" data-min="20" data-max="100"> games</span></p>
+                        <p class="AdjustHelp">&nbsp; drag</p>
+                    </span>
+                <p class="sim-output">Total Payoff: $<span data-var="payoff"></span></p>
+                <p class="sim-output">Avg. Payoff: $<span data-var="avgPayoff"></span></p></div>
+            </div>
+        </div>
+        <!-- 
+        <div class="col-md-6">
+            <div class="payoffHist"></div>
+        </div> -->
+        <div class="col-md-8">
+            <p class="margin-top-md">Since most of the time payoffs are very low, and high payoffs are incredibly rare, it does make sense not to pay a large amount of money to play this game. This leads to question: <i>how do you resolve this paradox?</i></p>
+            <p class="margin-top-sm">The classical resolution of this paradox involved the explicit introduction of the uility function (where, utility is the satisfaction or benefit derived by consuming a product) which presumes the law of diminishing marginal utility of money. According to this, the first unit of gain in money yields more uility than the second and subsequent units.</p>
+            <p class="margin-top-sm">For this game, the utility model uses the logarithmic function, which is known as the log utility. In this function, the gambler's wealth is represented as <i>w</i> and the cost to enter the game is <i>c</i>. The utility function calculates the change in utility as <i>ln</i>(wealth after the game) - <i>ln</i>(wealth before the game), which is weighted by the probability of that event occuring. <b>This value is definitely finite</b>.</p>
+            <img class="img-responsive margin-top-sm" src="images/utility.jpg">
+            <p class="margin-top-sm">Utility is often used to show how a person should behave in such a situation. Let's try to predict how a person should behave according to Utility theory by taking into account both the Wealth of the person, and the Cost to play the game.</p>
+        </div>
+        <div class="row">
+            <div class="col-md-8">
                 <div class="utilityPlot"></div>
-                <p class="margin-top-sm margin-btm-md" id="getSpend">Ideally, you would look to maximize your utility. Hence, in any game where your payoff is less than zero you incur a negative utility. Under the current constraints, you should be willing to pay a maximum of <span id="spend" data-var="spend">$</span> to enter the game, as the equation above indicates, the summation from 0 to infinity yields a positive value if the cost is atmost $8.
             </div>
+            <div class="col-md-4">
+                <h6 class="project-details margin-top-md">Simulate games</h6>
+                <div id="setUtility">
+                    <p class="val-adjust" style="display: inline;">Wealth: $<span data-var="wealth" class="TKAdjustableNumber" data-min="2" data-max="100000" data-step="10"></span></p>
+                    <p class="AdjustHelp">&nbsp; drag</p>
+                    <br>
+                    <p class="val-adjust" style="display: inline;">Cost: $<span data-var="cost" class="TKAdjustableNumber" data-min="1" data-max="100000"></span></p>
+                    <p class="AdjustHelp">&nbsp; drag</p>
+                    <p class="sim-output margin-top-sm">You should <span class="val-output" data-var="minPositive"></span> be willing to play</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <p class="margin-top-sm margin-btm-md" id="getSpend">Ideally, you would look to maximize your utility. Hence, in any game where your payoff is less than zero you incur a negative utility. Under the current constraints, you should be willing to pay a maximum of 
+                <!-- <span id="spend" data-var="spend">$</span>  -->
+            to enter the game, as the equation above indicates, the summation from 0 to infinity yields a positive value if the cost is atmost $8.</p>
         </div>
     </div>
     <div class="page-footer margin-top-xl">
@@ -196,16 +227,6 @@
                 $('h1').addClass('margin-top-lmd');
             }
         });
-
-
-    (function(h,o,t,j,a,r){
-        h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
-        h._hjSettings={hjid:448403,hjsv:5};
-        a=o.getElementsByTagName('head')[0];
-        r=o.createElement('script');r.async=1;
-        r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
-        a.appendChild(r);
-    })(window,document,'//static.hotjar.com/c/hotjar-','.js?sv=');
 </script>
 
 </html>

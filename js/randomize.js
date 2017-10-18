@@ -1,21 +1,67 @@
-var width = 540, 
-height = 360, 
+var width = 750, 
+height = 330, 
 xMargin = 60, 
 yMargin = 60,
 xLabelX = 360,
 xLabelY = height,
 yLabelX = xMargin - 35,
-yLabelY = yMargin + 40;
-
-var xScale, yScale;
+yLabelY = yMargin + 40,
+max = 128;
 
 function emptyCanvas(){
 	d3.select('svg.payoffChart').selectAll('*').remove();
 	d3.select('svg.payoffDist').selectAll('*').remove();
 }
 
+function updateCanvas(data){
+	width = 750,
+	xMargin = 60, 
+	yMargin = 60,
+	xLabelX = 360,
+	xLabelY = height,
+	yLabelX = xMargin - 35,
+	yLabelY = yMargin + 40;
+	def = 511;
+	max = d3.max(data);
+	if (max < def){
+		height = 330;
+		max = 256;
+	} else {
+		height = 330 + (Math.log2(max) - 8)*30;
+	}
+
+	canvas.attr("height", height);
+}
+
 function emptyUtility(){
 	d3.select('svg.utilityFn').selectAll('*').remove();
+}
+
+function getFrequency(data){
+	payoff_counts = {}
+	countDict = {}
+	for (i=0; i<data.length; i++){
+		val = data[i];
+		if (!(val in payoff_counts)){
+			payoff_counts[val] = 0;
+		}
+		payoff_counts[val] += 1;
+	}
+	return payoff_counts;
+}
+
+function getPreFrequency(payoffs, data){
+	var prevkey = d3.min(data);
+	var preVal = 0;
+	for (j in payoffs){
+		countDict[j] = +payoffs[prevkey] + preVal;
+		if (!(j == prevkey)){
+			preVal = +countDict[j];
+		}
+		prevkey = j;
+	}
+	countDict[d3.min(data)] = 0;
+	return countDict;
 }
 
 /*
@@ -24,88 +70,57 @@ function emptyUtility(){
 function drawAxis(num, data){
 	maxPay = d3.max(data);
 
-	xScale = d3.scale.linear()
-				.domain([0, num])
-				.range([xMargin, width - xMargin]);
+	xScale = d3.scaleLinear()
+			.domain([0, 40])
+			.range([xMargin, width]);
 
-	yScale = d3.scale.log()
-					.domain([1, (maxPay+5)])
-					.range([height - yMargin, yMargin])
-					.base(2);
-
-	// Define x and y Axis
-	var xAxis = d3.svg.axis()
-						.scale(xScale)
-						.orient("bottom")
-						.tickFormat(d3.format("d"));
-
-	var yAxis = d3.svg.axis()
-						.scale(yScale)
-						.orient("left")
-						.ticks("7")
-						.tickFormat(d3.format("d"));
-
-	canvas.append("g")
-		.attr("class", "axis")
-		.attr("id", "xAxis")
-		.attr("transform", "translate(0," + (height - yMargin) + ")")
-		.call(xAxis);
+	yScale = d3.scaleLog()
+			.domain([max, 1])
+			.range([height - yMargin/2, yMargin])
+			.base(2);
 
 	canvas.append("g")
 		.attr("class", "axis")
 		.attr("id", "yAxis")
 		.attr("transform", "translate("+ xMargin + ","+ 0 +")")
-		.call(yAxis);
+		.call(d3.axisLeft(yScale)
+				.tickFormat(d3.format("$,")));
 
 	canvas.append("text")
 	    .attr("class", "axis-label")
-	    .attr("transform", "translate("+ yLabelX +","+ yLabelY +") rotate(-90)")
+	    .attr("transform", "translate("+ yLabelX +",20)")
 	    .text("Payoff");
 
-	canvas.append("text")
-	    .attr("class", "axis-label")
-	    .attr("transform", "translate("+ xLabelX +","+ xLabelY +")")
-	    .attr("dy", "-20")
-	    .text("Number of Games");
+	canvas.select(".domain").remove();
+	canvas.selectAll(".tick line").remove();
+	canvas.selectAll(".tick text")
+			.attr("class", "tickFormat")
+			.attr("class", function(d){ return "payoff-"+d; });
 }
 
 function drawPayoff(data){
+	d3.select("g.tick text.payoff-1").text("$0");
+
 	var payoffGroup = d3.select('svg.payoffChart')
 					.append('g')
 					.attr('class', 'payoffGroup');
 
 	var mean = calcMean(data);
 
-	var line = d3.svg.line()
-					.x(function(d, i){ return xScale(i+1); })
-					.y(function(d, i){ return yScale(mean)});
-
-	var payoffLine = payoffGroup.append('path')
-					.datum(data)
-					.attr('class', 'payoffLine')
-					.attr('d', line)
-					.on("mouseover", function(d, i){
-						meanPopup(mean, i);
-					})
-					.on("mouseout", function(d){
-						payoffGroup.selectAll(".data-label").remove();
-					});
+	payoff_counts = getFrequency(data);
+	dict = getPreFrequency(payoff_counts, data);
 
 	var payoffCircle = payoffGroup.selectAll('circle')
 						.data(data)
 						.enter()
 						.append('circle')
-						.attr('cx', function(d, i) { return xScale(i+1); })
+						.attr('cx', function(d, i) { return xScale(i - dict[d] + 1); })
 						.attr('cy', function(d, i) { return yScale(d); })
 						.attr('r', function(d, i){
-							if (d==0){
-								return 0;
-							}
-							else {
-								return 2;
-							}
+							if (d==0){ return 0; }
+							else { return 5; }
 						})
-						.attr('fill', '#666')
+						.attr('fill', '#6BB7B8')
 						.on("mouseover", function(d, i){
 							payoffPopup(d, i);
 						})
@@ -114,128 +129,23 @@ function drawPayoff(data){
 						});
 
 	function payoffPopup(d, i){
+		if (d == 1){
+			payoff = 0;
+		} else {
+			payoff = d
+		}
+
 		payoffGroup.append('rect')
 			.attr("class", "data-label label-container")
-			.attr("transform", "translate("+ (xScale(i)) +","+ (yScale(d)-42) +")")
+			.attr("transform", "translate("+(xScale(i - dict[d] + 1))+","+(yScale(d) - 42)+")")
 			.attr("opacity", 0.8);
 
 		payoffGroup.append("text")
 			.attr("class", "data-label")
 			.attr("id", "data-amt-in")
 			.attr("dy", "-21")
-			.attr("transform", "translate("+ (xScale(i)+8) +","+ yScale(d) +")")
-			.text("Payoff: "+ d);
-	}
-
-	function meanPopup(mean, i){
-		payoffGroup.append('rect')
-			.attr("class", "data-label label-container")
-			.attr("transform", "translate("+ (width-2*xMargin-8) +","+ (yScale(mean)-42) +")")
-			.attr("opacity", 0.8);
-
-		payoffGroup.append("text")
-			.attr("class", "data-label")
-			.attr("id", "data-amt-in")
-			.attr("dy", "-21")
-			.attr("transform", "translate("+ (width-2*xMargin) +","+ yScale(mean) +")")
-			.text("Mean: "+ mean.toFixed(2));
-	}
-}
-/*
-========== draw axis for Histogram ==========
-*/
-function drawHist(payoff){
-	maxPay = d3.max(payoff);
-	minPay = d3.min(payoff);
-
-	var xScaleHist = d3.scale.log()
-			.domain([minPay, maxPay])
-			.range([xMargin, width - xMargin])
-			.base(2);
-
-	var histScale = d3.scale.linear()
-			.domain([minPay, maxPay])
-			.range([xMargin, width - xMargin]);
-
-	var data = d3.layout.histogram()
-				.bins(histScale.ticks(maxPay))
-				(payoff);
-
-	var countMax = d3.max(data, function(d){return d.length});
-	var countMin = d3.min(data, function(d){return d.length});
-
-	yScaleHist = d3.scale.linear()
-					.domain([0, countMax])
-					.range([height - yMargin, yMargin]);
-
-	// Define x and y Axis
-	var xAxisHist = d3.svg.axis()
-						.scale(xScaleHist)
-						.orient("bottom")
-						.tickFormat(d3.format("d"));
-
-	var yAxisHist = d3.svg.axis()
-						.scale(yScaleHist)
-						.orient("left")
-						.ticks("7");
-
-	histogram.append("g")
-		.attr("class", "axis")
-		.attr("id", "xAxis")
-		.attr("transform", "translate(0," + (height - yMargin) + ")")
-		.call(xAxisHist);
-
-	histogram.append("g")
-		.attr("class", "axis")
-		.attr("id", "yAxis")
-		.attr("transform", "translate("+ xMargin + ","+ 0 +")")
-		.call(yAxisHist);
-
-	histogram.append("text")
-	    .attr("class", "axis-label")
-	    .attr("transform", "translate("+ yLabelX +","+ yLabelY +") rotate(-90)")
-	    .text("Count");
-
-	histogram.append("text")
-	    .attr("class", "axis-label")
-	    .attr("transform", "translate("+ xLabelX +","+ xLabelY +")")
-	    .attr("dy", "-20")
-	    .text("Payoff");
-
-	var histGroup = d3.select('svg.payoffDist')
-					.append('g')
-					.attr('class', 'histGroup');
-
-	var bar = histGroup.selectAll(".bar")
-				.data(data)
-				.enter().append("g")
-				.attr("class", "bar")
-				.attr("transform", function(d) { return "translate(" + xScaleHist(d.x) + "," + yScaleHist(d.y) + ")"; });
-
-	bar.append("rect")
-	    .attr("x", 1)
-	    .attr("width", (xScaleHist(data[0].dx)/2))
-	    .attr("height", function(d) { return height - yMargin - yScaleHist(d.y); })
-	    .attr("fill", "#4580b0")
-	    .on("mouseover", function(d, i){
-	    	histPopup(d, i)
-	    })
-	    .on("mouseout", function(d, i){
-	    	histGroup.selectAll(".data-label").remove();
-	    });
-
-	function histPopup(d, i){
-		histGroup.append('rect')
-			.attr("class", "data-label label-container")
-			.attr("transform", "translate("+ (xScaleHist(d.x)) +","+ (yScaleHist(d.y)-42) +")")
-			.attr("opacity", 0.8);
-
-		histGroup.append("text")
-			.attr("class", "data-label")
-			.attr("id", "data-amt-in")
-			.attr("dy", "-21")
-			.attr("transform", "translate("+ (xScaleHist(d.x)+8) +","+ yScaleHist(d.y) +")")
-			.text("Count: "+ d.y);
+			.attr("transform", "translate("+ (xScale(i - dict[d] + 1) + 8) +","+ yScale(d) +")")
+			.text("$"+payoff+": "+(payoff_counts[d])+" times");
 	}
 }
 
@@ -269,15 +179,17 @@ function partition(array, low, high){
 /*
 ========== Line chart of the simulations ==========
 */
+
+
 var canvas = d3.select('div.payoffGame')
 				.append('svg')
 				.attr('class', 'payoffChart')
 				.attr('width', width)
 				.attr('height', height);
-
 /*
 ========== Histogram of the simulations ==========
 */
+
 var histogram = d3.select('div.payoffHist')
 				.append('svg')
 				.attr('class', 'payoffDist')
@@ -287,6 +199,7 @@ var histogram = d3.select('div.payoffHist')
 /*
 ========== Expectation based on Utility function ==========
 */
+
 var utility = d3.select('div.utilityPlot')
 				.append('svg')
 				.attr('class', 'utilityFn')
@@ -301,65 +214,57 @@ function calcMean(array){
 	return sum/array.length;
 }
 
-function calcUtility(max, wealth, cost){
-	utilData = [], minIdx = 0;
-	for (k=0; k<max; k++){
-		chance = Math.pow(2, k/2);
+
+function calcUtility(points, wealth, cost){
+	utilData = [], utilSum = [], minIdx = 0;
+	utilSum.push(0)
+	for (k=1; k<points; k++){
+		chance = Math.pow(2, k);
 		var deltaE = (Math.log(wealth + chance - cost) - Math.log(wealth))/chance;
+
 		if (deltaE < 0){
 			minIdx += 1;
 		}
 		utilData.push(deltaE);
+		sum = utilSum[k-1] + deltaE;
+		utilSum.push(sum);	
 	}
-	maxOfArray = d3.max(utilData);
-	indexOfMax = utilData.indexOf(maxOfArray);
+	util = minPositive(utilSum);
+	return utilSum;
 }
 
-function calcMaxSpend(wealth){
-	deltaE = 0;
-	cost = 0;
-	for (cost = 0; cost<1000; cost++){
-		for (i=0; i<1000; i++){
-			chance = Math.pow(2, i/2);
-			deltaE += (Math.log(wealth + chance - cost) - Math.log(wealth))/chance;
-		}
-		if (deltaE < 0){
-			return cost;
+function minPositive(data){
+	for (k=1; k<=data.length; k++){
+		if (data[k] > 0){
+			return data[k]
 		}
 	}
+	return -1;
 }
 
-function plotUtility(max, wealth, cost){
-	var xScaleUtil = d3.scale.linear()
-				.domain([0, k/2])
+function plotUtility(max, utilSum, wealth){
+	utilSum.shift();
+
+	x = d3.scaleLinear()
+				.domain([1, utilSum.length])
 				.range([xMargin+20, width-xMargin]);
 
-	yScaleUtil = d3.scale.linear()
-					.domain([d3.min(utilData), d3.max(utilData)+0.02])
+	y = d3.scaleLinear()
+					.domain([d3.min(utilSum), d3.max(utilSum)+0.02])
 					.range([height - yMargin, yMargin]);
 
 	// Define x and y Axis
-	var xAxisUtil = d3.svg.axis()
-						.scale(xScaleUtil)
-						.orient("bottom")
-						.tickFormat(d3.format("d"));
-
-	var yAxisUtil = d3.svg.axis()
-						.scale(yScaleUtil)
-						.orient("left")
-						.ticks("7");
-
 	utility.append("g")
 		.attr("class", "axis")
 		.attr("id", "xAxis")
 		.attr("transform", "translate(0," + (height - yMargin) + ")")
-		.call(xAxisUtil);
+		.call(d3.axisBottom(x));
 
 	utility.append("g")
 		.attr("class", "axis")
 		.attr("id", "yAxis")
 		.attr("transform", "translate("+ (xMargin+20) + ","+ 0 +")")
-		.call(yAxisUtil);
+		.call(d3.axisLeft(y).ticks(5));
 
 	utility.append("text")
 	    .attr("class", "axis-label")
@@ -376,41 +281,45 @@ function plotUtility(max, wealth, cost){
 					.append('g')
 					.attr('class', 'utilGroup');
 
-	var line = d3.svg.line()
-					.x(function(d, i){ return xScaleUtil(i/2+1); })
-					.y(function(d){ return yScaleUtil(d); })
+	var line = d3.line()
+					.x(function(d, i){ return x(i+1); })
+					.y(function(d){ return y(d); })
 
 	var utilLine = utilGroup.append('path')
-					.datum(utilData)
+					.datum(utilSum)
 					.attr('class', 'utilityLine')
 					.attr('d', line);
 
-	var maxUtil = d3.svg.line()
-					.x(xScaleUtil(indexOfMax/2))
-					.y(function(d){ return yScaleUtil(d); })
+	var maxUtil = d3.line()
+					.x(function(d, i){ return x(i+1); })
+					.y(y(0));
 
 	var maxLine = utilGroup.append('path')
-					.datum(utilData)
+					.datum(utilSum)
 					.attr('class', 'maxUtility')
-					.attr('d', maxUtil)
-					.on("mouseover", function(d, i){
-						maxUtilPopup(indexOfMax);
-					})
-					.on("mouseout", function(d){
-						utilGroup.selectAll(".data-label").remove();
-					});
+					.attr('d', maxUtil);
+
+					// .on("mouseover", function(d, i){
+					// 	maxUtilPopup(indexOfMax);
+					// })
+					// .on("mouseout", function(d){
+					// 	utilGroup.selectAll(".data-label").remove();
+					// });
+/*
 
 	function maxUtilPopup(max){
 		utilGroup.append('rect')
 			.attr("class", "data-label label-container")
-			.attr("transform", "translate("+ (xScaleUtil(minIdx/2)+8) +","+ ((height-yMargin)-42) +")")
+			.attr("transform", "translate("+ (x(minIdx/2)+8) +","+ ((height-yMargin)-42) +")")
 			.attr("opacity", 0.8);
 
 		utilGroup.append("text")
 			.attr("class", "data-label")
 			.attr("id", "data-amt-in")
 			.attr("dy", "-21")
-			.attr("transform", "translate("+ (xScaleUtil(minIdx/2)+16) +","+ (height-yMargin) +")")
+			.attr("transform", "translate("+ (x(minIdx/2)+16) +","+ (height-yMargin) +")")
 			.text("Payoff: $"+ minIdx/2);
 	}
+*/
 }
+
