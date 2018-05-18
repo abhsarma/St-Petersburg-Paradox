@@ -1,4 +1,4 @@
-var width = 750, 
+var width = 860, 
 height = 330, 
 xMargin = 60, 
 yMargin = 60,
@@ -14,7 +14,7 @@ function emptyCanvas(){
 }
 
 function updateCanvas(data){
-	width = 750,
+	width = 860,
 	xMargin = 60, 
 	yMargin = 60,
 	xLabelX = 360,
@@ -71,7 +71,7 @@ function drawAxis(num, data){
 	maxPay = d3.max(data);
 
 	xScale = d3.scaleLinear()
-			.domain([0, 40])
+			.domain([0, 60])
 			.range([xMargin, width]);
 
 	yScale = d3.scaleLog()
